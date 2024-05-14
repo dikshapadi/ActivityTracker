@@ -1,0 +1,2 @@
+class VisitedSite < ApplicationRecord
+end
