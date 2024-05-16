@@ -22,23 +22,26 @@ class VisitedSitesController < ApplicationController
     end
   
   
-     # Action to update the duration of a visited site
-     def update_duration
-        visited_site = VisitedSite.find_by(url: params[:url])
-        if visited_site
-          # Convert duration parameter to integer
-          duration = params[:duration].to_i
-          visited_site.update(duration: duration)
-          head :ok
-        else
-          render json: { error: 'Visited site not found' }, status: :not_found
+    def update_duration
+      visited_sites = VisitedSite.where(url: params[:url])
+      if visited_sites.any?
+        close_time = Time.current
+        visited_sites.each do |visited_site|
+          duration_in_seconds = (close_time - visited_site.visited_at).to_i
+          duration_in_minutes = duration_in_seconds / 60 # Duration in minutes
+          visited_site.update(duration: duration_in_minutes)
         end
+        head :ok
+      else
+        render json: { error: 'Visited site not found' }, status: :not_found
       end
+    end
       
     private
   
     def visited_site_params
       params.require(:visited_site).permit(:url)
     end
+    
   end
   
