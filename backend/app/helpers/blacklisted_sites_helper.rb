@@ -1,0 +1,2 @@
+module BlacklistedSitesHelper
+end

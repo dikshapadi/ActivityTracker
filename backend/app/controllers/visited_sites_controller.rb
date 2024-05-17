@@ -12,13 +12,18 @@ class VisitedSitesController < ApplicationController
     
     # Action to create a new visited site
     def create
-        visited_site = VisitedSite.new(visited_site_params)
-        visited_site.visited_at = Time.current 
-        if visited_site.save
+      url = visited_site_params[:url]
+    
+    if blacklisted?(url)
+      render json: { error: 'This site is blacklisted' }, status: :forbidden
+    else
+      visited_site = VisitedSite.new(visited_site_params)
+      if visited_site.save
         render json: visited_site, status: :created
-        else
+      else
         render json: { errors: visited_site.errors.full_messages }, status: :unprocessable_entity
-        end
+      end
+    end
     end
   
   
@@ -36,12 +41,18 @@ class VisitedSitesController < ApplicationController
         render json: { error: 'Visited site not found' }, status: :not_found
       end
     end
-      
+    
+    
     private
   
-    def visited_site_params
-      params.require(:visited_site).permit(:url)
-    end
+  def visited_site_params
+    params.require(:visited_site).permit(:url)
+  end
+  def blacklisted?(url)
+    BlacklistedSite.exists?(url: url)
+  end
     
+    
+
   end
   

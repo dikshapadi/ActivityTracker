@@ -43,24 +43,40 @@ function updateDuration(url) {
     });
 }
 
-
 // Function to track visited sites
 function trackVisitedSite(url) {
-    // Make a POST request to your backend endpoint to track the visited site
-    fetch('http://localhost:3000/visited_sites', {
-        method: 'POST',
+    fetch('http://localhost:3000/blacklisted_sites', {
+        method: 'GET',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ visited_site: { url:url } }),
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Failed to track visited site');
+    .then(response => response.json())
+    .then(data => {
+        const blacklistedSites = data.map(site => site.url);
+        if (blacklistedSites.includes(url)) {
+            // Redirect to the blocked page
+            chrome.tabs.update({ url: './blocked_page.html' });
+        } else {
+            // Make a POST request to your backend endpoint to track the visited site
+            fetch('http://localhost:3000/visited_sites', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ visited_site: { url: url } }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to track visited site');
+                }
+            })
+            .catch(error => {
+                console.error('Error tracking visited site:', error);
+            });
         }
     })
     .catch(error => {
-        console.error('Error tracking visited site:', error);
+        console.error('Error fetching blacklisted sites:', error);
     });
 }
-

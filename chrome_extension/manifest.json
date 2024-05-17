@@ -3,15 +3,26 @@
     "name": "Activity tracker",
     "version": "1.0",
     "permissions": [
-        "tabs",
-        "storage"    ],
+      "tabs",
+      "storage"
+    ],
     "background": {
-        "service_worker": "./background.js"
+      "service_worker": "./background.js"
     },
     "action": {
-        "default_popup": "popup.html"
+      "default_popup": "popup.html"
     },
     "content_security_policy": {
-        "extension_pages": "script-src 'self'; object-src 'self'"
+      "extension_pages": "script-src 'self'; object-src 'self'"
+    },
+   
+    "web_accessible_resources": [
+      {
+        "resources": [
+          "blocked_page.html"
+        ],
+        "matches": ["<all_urls>"]
       }
-}
+    ]
+  }
+  
