@@ -18,6 +18,7 @@ class VisitedSitesController < ApplicationController
       render json: { error: 'This site is blacklisted' }, status: :forbidden
     else
       visited_site = VisitedSite.new(visited_site_params)
+      visited_site.update(visited_at: Time.current) unless visited_site.visited_at.present?
       if visited_site.save
         render json: visited_site, status: :created
       else
@@ -28,18 +29,20 @@ class VisitedSitesController < ApplicationController
   
   
     def update_duration
+      close_time = Time.current
       visited_sites = VisitedSite.where(url: params[:url])
-      if visited_sites.any?
-        close_time = Time.current
-        visited_sites.each do |visited_site|
+  
+      visited_sites.each do |visited_site|
+        if visited_site.visited_at.present?
           duration_in_seconds = (close_time - visited_site.visited_at).to_i
           duration_in_minutes = duration_in_seconds / 60 # Duration in minutes
           visited_site.update(duration: duration_in_minutes)
+        else
+          Rails.logger.warn "Visited site #{visited_site.id} has no visited_at time"
         end
-        head :ok
-      else
-        render json: { error: 'Visited site not found' }, status: :not_found
       end
+  
+      head :ok
     end
     
     
